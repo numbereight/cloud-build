@@ -1,3 +1,5 @@
+substitutions:
+  _DRIFT_DETECT: "false"
 steps:
   - id: "init"
     name: hashicorp/terraform:1.12.2
@@ -21,10 +23,16 @@ steps:
     name: hashicorp/terraform:1.12.2
     entrypoint: sh
     args:
-      - "-c"
-      - terraform plan -no-color --detailed-exitcode 
+      - -c
+      - |
+        if [[ "$_DRIFT_DETECT" == "true" ]]; then
+          echo "Running drift detection"
+          terraform plan -no-color --detailed-exitcode
+        else
+          terraform plan -no-color
+        fi
     volumes:
       - name: "ssh"
         path: /root/.ssh
-timeout: 600s # default 10 minutes
+timeout: 600s
 logsBucket: gs://sp-archived-drive
